@@ -1,8 +1,10 @@
 #!/bin/bash
 OFF='\e[0m'
 BWhite='\e[1;37m'
+BYellow='\e[1;33m'
 On_White='\e[1;30;43m'
 On_Red='\e[1;30;41m'
+API-KEY='aksakefkkf3o2fo23olw'
 
 echo -e "${BWhite}###############################################################"
 echo -e "## Upload to HYDRAX                                         v##"
@@ -13,13 +15,13 @@ hydraxupload() {
         echo "###############################################################"
         for file in $(ls *.mkv)
         do
-                [ -f $file ] && curl -F "file=@$file" up.hydrax.net/api-key
+                [ -f $file ] && echo -e "\nUploading:${BYellow} $file ${BWhite}" && curl -F "file=@$file" up.hydrax.net/${API-KEY}
         done
-        echo -e "###############################################################${OFF}"
+        echo -e "\n###############################################################${OFF}"
 }
 
 tanyasatu() {
-        echo -e "${On_White} Apakah ingin mengupload ke HYDRAX? ${OFF}${BWhite} "
+        echo -e "${On_White} Apakah ingin menguploadke HYDRAX file di folder ini? ${OFF}${BWhite} "
         read -p " Masukan Pilihan: (y/n) " RESP
         if [ "$RESP" = "y" ]; then
           hydraxupload

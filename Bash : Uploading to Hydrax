@@ -1,0 +1,31 @@
+#!/bin/bash
+OFF='\e[0m'
+BWhite='\e[1;37m'
+On_White='\e[1;30;43m'
+On_Red='\e[1;30;41m'
+
+echo -e "${BWhite}###############################################################"
+echo -e "## Upload to HYDRAX                                         v##"
+echo -e "###############################################################${OFF}"
+echo " "
+
+hydraxupload() {
+        echo "###############################################################"
+        for file in $(ls *.mkv)
+        do
+                [ -f $file ] && curl -F "file=@$file" up.hydrax.net/a31e01ae9b6afc4d0ce238113ca580e6
+        done
+        echo -e "###############################################################${OFF}"
+}
+
+tanyasatu() {
+        echo -e "${On_White} Apakah ingin mengextrak subtitle di folder ini? ${OFF}${BWhite} "
+        read -p " Masukan Pilihan: (y/n) " RESP
+        if [ "$RESP" = "y" ]; then
+          hydraxupload
+        else
+          echo -e "${On_Red} Byee.. ${OFF}\n"
+        fi
+}
+
+tanyasatu

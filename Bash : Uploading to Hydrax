@@ -13,13 +13,13 @@ hydraxupload() {
         echo "###############################################################"
         for file in $(ls *.mkv)
         do
-                [ -f $file ] && curl -F "file=@$file" up.hydrax.net/a31e01ae9b6afc4d0ce238113ca580e6
+                [ -f $file ] && curl -F "file=@$file" up.hydrax.net/api-key
         done
         echo -e "###############################################################${OFF}"
 }
 
 tanyasatu() {
-        echo -e "${On_White} Apakah ingin mengextrak subtitle di folder ini? ${OFF}${BWhite} "
+        echo -e "${On_White} Apakah ingin mengupload ke HYDRAX? ${OFF}${BWhite} "
         read -p " Masukan Pilihan: (y/n) " RESP
         if [ "$RESP" = "y" ]; then
           hydraxupload

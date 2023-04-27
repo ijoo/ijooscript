@@ -1,7 +1,7 @@
 #!/bin/bash
 # see index
 # ffprobe -v error -of json input.mkv -of json -show_entries "stream=index:stream_tags=language" -select_streams s
-#
+# ffmpeg -i input.mkv -map "0:index-no" output.eng.srt
 
 OFF='\e[0m'
 BWhite='\e[1;37m'

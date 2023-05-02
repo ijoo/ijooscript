@@ -199,7 +199,7 @@ def hydrax_f():
 
 def hydrax_u(ty, tt):
         print("      \x1b[1;97;104m H.Y.D.R.A.X \x1b[0m \x1b[1;97;43m Uploading.. \x1b[0m \x1b[4;97m" + tt + "\x1b[0m")
-        url = url = "http://up.hydrax.net/a31e01ae9b6afc4d0ce238113ca580e6"
+        url = url = "http://up.hydrax.net/*******API****"
         hfile_type = "video/" + ty
         hfile_path = "./" + tt
         hfiles = { 'file': (tt, open(hfile_path, 'rb'), hfile_type) }

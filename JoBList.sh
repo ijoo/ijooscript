@@ -1,4 +1,13 @@
 #!/bin/bash
+# App Name: iJoo DNS BlackList (JoBList)
+# Author: iJoo (admin@ijoo.org)
+# Fungsi: DNS filtering and Blacklist Website tertentu..
+# Cara menggunakannya tinggal di download dan di "eksekusi" dalam shell
+# root@~# bash JoBList.sh
+# 
+# setelah selesai bisa menambahkan domain yang akan diblacklist dengan perintah "ipk"
+# dibuat dengan Debian 12, tapi kemungkinan akan jalan di Ubuntu 20+
+# 
 
 if [[ $(id -u) != 0 ]]; then
     echo "This script must be run as root."

@@ -18,6 +18,7 @@ install_update() {
   echo " [!] Updating System >>>>"
   rm -rf /etc/apt/sources.list
   wget https://raw.githubusercontent.com/ijoo/ijooscript/main/sources.list -O /etc/apt/sources.list
+  timedatectl set-timezone Asia/Jakarta 
   apt update
   apt upgrade -y
   echo " [!] Update Selesai <<<<"

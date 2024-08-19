@@ -84,6 +84,9 @@ case "$inul" in
                 install_mulai
                 install_setup
         ;;
+        n|N)
+            echo " [!] Tidak Jadi Install"
+        ;;
         *)
                 echo "Silakan Memilih Y/N"
         ;;

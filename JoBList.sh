@@ -36,7 +36,7 @@ install_setup() {
   mkdir -p /etc/bind/block
   touch /etc/bind/named.conf.block-zones
   install_block
-  chown root.bind /etc/bind/block /etc/bind/block/db.block /etc/bind/named.conf.block-zones
+  chown root:bind /etc/bind/block /etc/bind/block/db.block /etc/bind/named.conf.block-zones
   echo "include \"/etc/bind/named.conf.block-zones\";" >> /etc/bind/named.conf
   wget dl.ijoo.org/tools/ipk -O /usr/local/bin/ipk
   chmod 755 /usr/local/bin/ipk

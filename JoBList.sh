@@ -48,10 +48,8 @@ install_setup() {
 
 install_block() {
 local_ips=$(hostname -I)
-cat > /etc/bind/block/db.block << EOF
-@    IN    A    $local_ips
-*    IN    CNAME    @
-EOF
+echo "@ IN A $local_ips" >> /etc/bind/block/db.block
+echo "* IN CNAME @" >> /etc/bind/block/db.block
 }
 
 install_named() {

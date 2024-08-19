@@ -32,38 +32,45 @@ install_mulai() {
 }
 
 install_setup() {
+  local_ips=$(hostname -I)
   echo " [!] Config System >>>> "
   mkdir -p /etc/bind/block
-  touch /etc/bind/named.conf.block-zones
+  cp /etc/bind/db.0 /etc/bind/block/db.block
   install_block
+  touch /etc/bind/named.conf.block-zones
   chown root:bind /etc/bind/block /etc/bind/block/db.block /etc/bind/named.conf.block-zones
   echo "include \"/etc/bind/named.conf.block-zones\";" >> /etc/bind/named.conf
   wget dl.ijoo.org/tools/ipk -O /usr/local/bin/ipk
   chmod 755 /usr/local/bin/ipk
+  install_named
   systemctl restart named
 }
 
 install_block() {
-  local_ips=$(hostname -I)
+local_ips=$(hostname -I)
 cat > /etc/bind/block/db.block << EOF
-;
-; BIND data file for local loopback interface
-;
-$TTL    604800
-@       IN      SOA     localhost. root.localhost. (
-                              2         ; Serial
-                         604800         ; Refresh
-                          86400         ; Retry
-                        2419200         ; Expire
-                         604800 )       ; Negative Cache TTL
-;
-@       IN      NS      localhost.
-@       IN      A       $local_ips
-*       IN      CNAME   @
-
+@    IN    A    $local_ips
+*    IN    CNAME    @
 EOF
-
 }
+
+install_named() {
+cat > /etc/bind/named.conf.options << EOF
+options {
+        directory "/var/cache/bind";
+        recursion yes;
+        allow-transfer { none; };
+        dnssec-validation auto;
+        auth-nxdomain no;
+        listen-on-v6 { any; };
+        check-names master ignore;
+        check-names slave ignore;
+        allow-query { any; };
+
+};
+EOF
+}
+
 # Main script
 echo "############################################################"
 echo " "

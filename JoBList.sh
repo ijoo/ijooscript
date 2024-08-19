@@ -52,10 +52,7 @@ case "$inul" in
                 install_mulai
                 install_setup
         ;;
-        n|N)
-                echo "no"
-        ;;
         *)
-                echo "y or n"
+                echo "Silakan Memilih Y/N"
         ;;
 esac

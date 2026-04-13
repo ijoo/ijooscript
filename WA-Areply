@@ -1,0 +1,177 @@
+/**
+ * WhatsApp Group Mention Auto-Reply Bot
+ * Uses: @open-wa/wa-automate
+ *
+ * Install:  npm init -y && npm install @open-wa/wa-automate
+ * Run:      node bot.js
+ *           Then scan the QR code with your phone (same as WhatsApp Web)
+ */
+
+const { create } = require('@open-wa/wa-automate');
+
+// ╔══════════════════════════════════════════╗
+// ║           YOUR CONFIG — EDIT THIS        ║
+// ╚══════════════════════════════════════════╝
+const CONFIG = {
+  myName:    'Victor',          // your name (case-insensitive match)
+  myNumber:  '628123456789',    // your number WITHOUT + sign
+  groupName: 'Family Group',    // part of the group name to watch (case-insensitive)
+  replyDelay: 2000,             // delay before responding in ms (feels more natural)
+};
+
+// ╔══════════════════════════════════════════╗
+// ║           RESPONSE OPTIONS               ║
+// ║                                          ║
+// ║   reaction   = 1  →  react with emoji   ║
+// ║   reply_text = 1  →  send a text reply  ║
+// ║                                          ║
+// ║   both can be ON at the same time!       ║
+// ║   set to 0 to disable either one         ║
+// ╚══════════════════════════════════════════╝
+const OPTIONS = {
+  reaction:   1,   // 1 = on, 0 = off
+  reply_text: 1,   // 1 = on, 0 = off
+};
+
+// ╔══════════════════════════════════════════╗
+// ║         REACTION RULES                   ║
+// ║  keyword → emoji reaction                ║
+// ║  '' as last keyword = fallback           ║
+// ╚══════════════════════════════════════════╝
+const REACTION_RULES = [
+  { keyword: 'happy birthday',      emoji: '🎂' },
+  { keyword: 'selamat ulang tahun', emoji: '🎂' },
+  { keyword: 'congratulation',      emoji: '🎉' },
+  { keyword: 'selamat',             emoji: '🎉' },
+  { keyword: 'hbd',                 emoji: '🎂' },
+  { keyword: 'happy new year',      emoji: '🎊' },
+  { keyword: 'merry christmas',     emoji: '🎄' },
+  { keyword: 'get well soon',       emoji: '🙏' },
+  { keyword: 'good morning',        emoji: '☀️' },
+  { keyword: 'good night',          emoji: '🌙' },
+  { keyword: '',                    emoji: '👍' }, // fallback — must be last
+];
+
+// ╔══════════════════════════════════════════╗
+// ║         TEXT REPLY RULES                 ║
+// ║  keyword → text reply                    ║
+// ║  '' as last keyword = fallback           ║
+// ╚══════════════════════════════════════════╝
+const REPLY_RULES = [
+  { keyword: 'happy birthday',      reply: 'Thank you so much!! 🎂🎉' },
+  { keyword: 'selamat ulang tahun', reply: 'Makasih banyak!! 🎂🎉' },
+  { keyword: 'congratulation',      reply: 'Thank you! Really appreciate it 🙏' },
+  { keyword: 'selamat',             reply: 'Makasih ya! 🙏' },
+  { keyword: 'hbd',                 reply: 'Thanks!! 🎂' },
+  { keyword: 'happy new year',      reply: 'Happy New Year to you too! 🎊' },
+  { keyword: 'merry christmas',     reply: 'Merry Christmas! 🎄' },
+  { keyword: 'get well soon',       reply: 'Thank you, I appreciate it! 🙏' },
+  { keyword: 'good morning',        reply: 'Good morning! ☀️' },
+  { keyword: 'good night',          reply: 'Good night! 🌙' },
+  { keyword: '',                    reply: 'Thanks for the mention! 😊' }, // fallback — must be last
+];
+
+// ═══════════════════════════════════════════
+//  BOT LOGIC — no need to edit below
+// ═══════════════════════════════════════════
+
+// Validate that at least one option is ON
+if (!OPTIONS.reaction && !OPTIONS.reply_text) {
+  console.error('⚠️  Both reaction and reply_text are OFF. Please turn at least one ON in OPTIONS.');
+  process.exit(1);
+}
+
+create({
+  sessionId:   'wa-bot',
+  multiDevice: true,
+  authTimeout: 60,
+  headless:    true,
+  qrTimeout:   0,
+  logConsole:  false,
+}).then(client => startBot(client))
+  .catch(err => {
+    console.error('Failed to start bot:', err);
+    process.exit(1);
+  });
+
+
+async function startBot(client) {
+  console.log('');
+  console.log('✅ Bot is online!');
+  console.log('   Watching for  :', CONFIG.myName, '/', CONFIG.myNumber);
+  console.log('   Target group  :', CONFIG.groupName);
+  console.log('   Reaction      :', OPTIONS.reaction   ? 'ON ✓' : 'OFF');
+  console.log('   Reply text    :', OPTIONS.reply_text ? 'ON ✓' : 'OFF');
+  console.log('');
+
+  client.onMessage(async (message) => {
+    try {
+      await handleMessage(client, message);
+    } catch (err) {
+      console.error('Error handling message:', err.message);
+    }
+  });
+}
+
+
+async function handleMessage(client, message) {
+  // 1. Only handle group messages
+  if (!message.isGroupMsg) return;
+
+  // 2. Check if this is the target group
+  const chat = await client.getChatById(message.chatId);
+  const groupMatch = chat.name.toLowerCase().includes(CONFIG.groupName.toLowerCase());
+  if (!groupMatch) return;
+
+  // 3. Check if the message mentions me (by name or number)
+  const text = message.body.toLowerCase();
+  const mentionsMyName   = text.includes(CONFIG.myName.toLowerCase());
+  const mentionsMyNumber = text.includes(CONFIG.myNumber);
+  if (!mentionsMyName && !mentionsMyNumber) return;
+
+  // 4. Wait a moment before responding (feels more natural)
+  await sleep(CONFIG.replyDelay);
+
+  const sender = message.sender?.pushname || message.from;
+  console.log(`[${timestamp()}] Mention detected in "${chat.name}" from ${sender}`);
+  console.log(`   Message: ${message.body}`);
+
+  // 5. Send reaction (if ON)
+  if (OPTIONS.reaction) {
+    const emoji = findMatch(REACTION_RULES, text, 'emoji');
+    if (emoji) {
+      await client.sendMessageReaction(message.id, emoji);
+      console.log(`   Reaction : ${emoji}`);
+    }
+  }
+
+  // 6. Send text reply (if ON)
+  if (OPTIONS.reply_text) {
+    const reply = findMatch(REPLY_RULES, text, 'reply');
+    if (reply) {
+      await client.sendText(message.chatId, reply);
+      console.log(`   Reply    : ${reply}`);
+    }
+  }
+
+  console.log('');
+}
+
+
+// Find the first matching rule and return the target field (emoji or reply)
+function findMatch(rules, text, field) {
+  for (const rule of rules) {
+    if (rule.keyword === '' || text.includes(rule.keyword.toLowerCase())) {
+      return rule[field];
+    }
+  }
+  return null;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function timestamp() {
+  return new Date().toLocaleTimeString('id-ID', { hour12: false });
+}
